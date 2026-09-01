@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Double Helix - GeneX BioLab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://3dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+<script src="models/dna.js"></script>
+<style>
+:root { --void:#08100f; --surface:#101c1a; --surface-2:#172825; --border:rgba(212,235,225,.14); --mint:#6ee7b0; --cyan:#35d6e0; --text:#f2f7f5; --muted:#a7bdb7; --dim:#67807a; --display:"Space Grotesk",sans-serif; --body:"Inter",sans-serif; --mono:"JetBrains Mono",monospace; }
+* { box-sizing:border-box; } body { margin:0; min-height:100vh; color:var(--text); font-family:var(--body); background:radial-gradient(900px 500px at 80% 0,rgba(53,214,224,.12),transparent 65%),radial-gradient(700px 500px at 0 20%,rgba(110,231,176,.08),transparent 65%),var(--void); } body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.22; background-image:linear-gradient(rgba(53,214,224,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(53,214,224,.035) 1px,transparent 1px); background-size:48px 48px; mask-image:linear-gradient(#000,transparent 82%); }
+.container { width:min(1080px,calc(100% - 36px)); margin:auto; } header { padding:24px 0; border-bottom:1px solid var(--border); } nav { display:flex; justify-content:space-between; align-items:center; gap:20px; } a { color:var(--muted); text-decoration:none; } a:hover { color:var(--mint); } .brand { color:var(--text); font:700 1.1rem var(--display); } .brand small { display:block; color:var(--dim); font:500 .58rem var(--mono); letter-spacing:.14em; text-transform:uppercase; }
+main { padding:58px 0 90px; } .eyebrow { color:var(--mint); font:500 .68rem var(--mono); letter-spacing:.14em; text-transform:uppercase; } h1,h2 { font-family:var(--display); } h1 { margin:12px 0 10px; font-size:clamp(2.5rem,6vw,5rem); line-height:1; letter-spacing:-.04em; } .lede { max-width:650px; color:var(--muted); font-size:1.05rem; } .lesson-grid { display:grid; grid-template-columns:1.15fr .85fr; gap:22px; margin-top:42px; } .viewer-panel,.info-panel { border:1px solid var(--border); border-radius:14px; background:linear-gradient(145deg,rgba(23,40,37,.9),rgba(10,16,15,.94)); box-shadow:0 22px 60px -28px #000; overflow:hidden; } .viewer-panel { position:relative; } #dna-viewer { position:relative; width:100%; height:520px; background:#050908; } #dna-viewer canvas { position:absolute !important; inset:0; width:100% !important; height:100% !important; } .toolbar { display:flex; flex-wrap:wrap; gap:8px; padding:16px; border-top:1px solid var(--border); } button { padding:9px 13px; border:1px solid var(--border); border-radius:7px; color:var(--muted); background:rgba(255,255,255,.04); cursor:pointer; font:500 .76rem var(--body); } button:hover,button.active { border-color:var(--mint); color:var(--mint); background:rgba(110,231,176,.08); } .info-panel { padding:28px; } .info-panel h2 { margin-top:0; } .info-panel p { color:var(--muted); line-height:1.7; } .fact { margin-top:24px; padding:16px; border-left:3px solid var(--cyan); background:rgba(53,214,224,.08); color:var(--muted); font-size:.85rem; line-height:1.55; } .fact strong { color:var(--text); } .status { padding:0 16px 16px; color:var(--dim); font:500 .65rem var(--mono); }
+.selection-info { margin-top:24px; padding:16px; border:1px solid rgba(110,231,176,.25); border-radius:8px; background:rgba(110,231,176,.06); }
+.selection-info h3 { margin:0 0 6px; font-size:1rem; color:var(--mint); }
+.selection-info p { margin:0; font-size:.82rem; line-height:1.55; }
+.info-panel { display:flex; flex-direction:column; }
+.selection-info { flex:1; }
+.ask-tutor { align-self:flex-start; }
+.status { padding-top:10px; letter-spacing:.04em; }
+.molecule-callout { position:absolute; top:18px; left:18px; z-index:2; padding:8px 12px; border:1px solid rgba(110,231,176,.45); border-radius:7px; background:rgba(5,9,8,.86); color:var(--mint); font:600 .72rem var(--mono); letter-spacing:.06em; opacity:0; transform:translateY(-6px); pointer-events:none; }
+.molecule-callout.show { animation:calloutIn 320ms ease forwards; }
+@keyframes calloutIn { to { opacity:1; transform:translateY(0); } }
+.ask-tutor { display:inline-flex; margin-top:24px; padding:11px 14px; border:1px solid rgba(110,231,176,.4); border-radius:8px; color:var(--mint); font-weight:600; }
+.ask-tutor:hover { background:rgba(110,231,176,.08); }
+.mission-panel { margin-top:24px; padding:16px; border:1px solid rgba(156,140,245,.32); border-radius:8px; background:rgba(156,140,245,.07); }
+.mission-panel h3 { margin:0 0 6px; color:#c1b8ff; font-size:1rem; }
+.mission-panel p { margin:0 0 12px; font-size:.82rem; line-height:1.55; }
+.mission-panel select { width:100%; margin-bottom:12px; padding:9px 10px; border:1px solid rgba(156,140,245,.35); border-radius:7px; background:var(--surface-2); color:var(--text); color-scheme:dark; font:500 .78rem var(--body); }
+.dna-sequence { display:block; margin:10px 0 12px; color:var(--cyan); font:700 1rem var(--mono); letter-spacing:.18em; }
+.mission-input-row { display:flex; gap:8px; }
+.mission-input-row input { flex:1; min-width:0; padding:9px 11px; border:1px solid var(--border); border-radius:7px; background:rgba(0,0,0,.2); color:var(--text); font-family:var(--mono); text-transform:uppercase; }
+.mission-feedback { min-height:20px; margin-top:10px !important; color:var(--muted); }
+.mission-feedback.success { color:var(--mint); }
+.mission-feedback.retry { color:#f2b25c; }
+.model-steps { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.model-step { border-radius:999px; padding:8px 12px; }
+.model-step.active { background:rgba(53,214,224,.1); border-color:var(--cyan); color:var(--cyan); }
+.step-caption { margin:14px 0 0; color:var(--muted); font-size:.82rem; line-height:1.55; }
+@media(max-width:760px) { main { padding-top:40px; } .lesson-grid { grid-template-columns:1fr; } #dna-viewer { height:380px; } .info-panel { padding:22px; } }
+</style>
+</head>
+<body>
+<header><nav class="container"><a class="brand" href="index.html">GeneX BioLab<small>DNA / molecular lesson</small></a><a href="explore.html">Back to Explore</a></nav></header>
+<main class="container"><span class="eyebrow">DNA &amp; RNA / structure 01</span><h1>The Double Helix</h1><p class="lede">Explore how DNA stores biological information in two complementary strands joined by precise base pairs.</p><div class="lesson-grid"><section class="viewer-panel"><div id="dna-viewer" aria-label="Interactive DNA double helix"><div class="molecule-callout" id="molecule-callout">Hover or click a base</div></div><div class="toolbar"><button type="button" class="active" data-style="cartoon">Structure</button><button type="button" data-style="surface">Surface</button><button type="button" data-style="stick">Atoms and bonds</button><button type="button" id="reset-btn">Reset view</button></div><div class="model-steps" aria-label="Guided DNA structure steps"><button type="button" class="model-step active" data-step="0">1. Strands</button><button type="button" class="model-step" data-step="1">2. Base pairs</button><button type="button" class="model-step" data-step="2">3. Backbone</button></div><p class="step-caption" id="step-caption">Two complementary strands form the overall double-helix shape.</p><div class="status" id="status">Loading DNA structure 1BNA...</div></section><aside class="info-panel"><h2>Read the molecule</h2><p>The two DNA strands run in opposite directions. Their bases pair in the center, allowing the sequence to be copied accurately.</p><div class="fact"><strong>Base pairing</strong><br>Adenine pairs with thymine. Guanine pairs with cytosine. These pairings help preserve genetic information.</div><div class="fact"><strong>Explore</strong><br>Drag to rotate the helix, scroll to zoom, and hover or click a base to reveal its name.</div><div class="selection-info" id="selection-info" aria-live="polite"><h3>Inspect a base</h3><p>Hover over or click an atom in the structure to see its identity and role.</p></div></aside></div></main>
+<script>
+(function () {
+  "use strict";
+  var model = window.GX_MOLECULE_MODELS.dna;
+  var viewer = $3Dmol.createViewer("dna-viewer", { backgroundColor: "#050908" });
+  var status = document.getElementById("status");
+  var selectionInfo = document.getElementById("selection-info");
+  var askTutor = document.createElement("a");
+  askTutor.className = "ask-tutor";
+  askTutor.href = "ai.html?context=dna-101&focus=DNA%20structure";
+  askTutor.textContent = "Ask the AI tutor about DNA →";
+  selectionInfo.parentNode.appendChild(askTutor);
+  var missionPanel = document.createElement("div");
+  missionPanel.className = "mission-panel";
+  missionPanel.innerHTML = '<h3 id="mission-title">DNA replication mission</h3><p id="mission-prompt">Build the complementary strand. Remember: A pairs with T, and G pairs with C.</p><select id="mission-select" aria-label="Choose a DNA mission"><option value="replicate">Build the complementary strand</option><option value="pairing">Identify the base pairing rule</option><option value="mutation">Find the mutation</option></select><span class="dna-sequence" id="mission-sequence">ATG CCA TTA GGC</span><div class="mission-input-row"><input id="dna-answer" type="text" maxlength="20" autocomplete="off" placeholder="Type your answer" aria-label="DNA mission answer"><button type="button" id="check-dna-answer">Check</button></div><p class="mission-feedback" id="dna-feedback" aria-live="polite">Enter your answer to test your understanding.</p>';
+  selectionInfo.parentNode.appendChild(missionPanel);
+  var dnaAnswer = missionPanel.querySelector("#dna-answer");
+  var dnaFeedback = missionPanel.querySelector("#dna-feedback");
+  var missionSelect = missionPanel.querySelector("#mission-select");
+  var missionTitle = missionPanel.querySelector("#mission-title");
+  var missionPrompt = missionPanel.querySelector("#mission-prompt");
+  var missionSequence = missionPanel.querySelector("#mission-sequence");
+  var missionData = {
+    replicate: { title: "DNA replication mission", prompt: "Build the complementary strand. Remember: A pairs with T, and G pairs with C.", sequence: "ATG CCA TTA GGC", placeholder: "Type 12 bases" },
+    pairing: { title: "Base pairing mission", prompt: "Which base does adenine pair with? Type the base name.", sequence: "A → ?", placeholder: "Type thymine" },
+    mutation: { title: "Mutation detection mission", prompt: "Compare the strands and identify the changed base.", sequence: "Original: ATG CCA / Mutated: ATG CTA", placeholder: "Type the changed base" },
+  };
+  function updateMission() {
+    var mission = missionData[missionSelect.value];
+    missionTitle.textContent = mission.title;
+    missionPrompt.textContent = mission.prompt;
+    missionSequence.textContent = mission.sequence;
+    dnaAnswer.value = "";
+    dnaAnswer.placeholder = mission.placeholder;
+    dnaFeedback.className = "mission-feedback";
+    dnaFeedback.textContent = "Enter your answer to test your understanding.";
+  }
+  missionPanel.querySelector("#check-dna-answer").addEventListener("click", function () {
+    var answer = dnaAnswer.value.toUpperCase().replace(/\s/g, "");
+    var source = "ATGCCATTAGGC";
+    var complement = { A: "T", T: "A", G: "C", C: "G" };
+    var expected = source.split("").map(function (base) { return complement[base]; }).join("");
+    var isCorrect = missionSelect.value === "replicate" ? answer === expected : missionSelect.value === "pairing" ? answer === "THYMINE" || answer === "T" : answer === "C";
+    dnaFeedback.className = "mission-feedback " + (isCorrect ? "success" : "retry");
+    dnaFeedback.textContent = isCorrect ? "Mission complete. Your DNA reasoning is correct." : "Not quite. Check the displayed strands and the A-T / G-C pairing rules.";
+  });
+  missionSelect.addEventListener("change", updateMission);
+  var moleculeCallout = document.getElementById("molecule-callout");
+  var stepCaption = document.getElementById("step-caption");
+  var stepDescriptions = ["Two complementary strands form the overall double-helix shape.", "The bases face inward and pair specifically: A with T, and G with C.", "The sugar-phosphate backbone forms the outer rails that hold the sequence together."];
+  var activeStep = 0;
+  function render(style) {
+    if (viewer.removeAllSurfaces) viewer.removeAllSurfaces();
+    if (style === "surface") {
+      viewer.setStyle({}, { stick: { radius: 0.08, colorscheme: "Jmol" } });
+      viewer.addSurface($3Dmol.SurfaceType.VDW, { opacity: 0.72, colorscheme: "Jmol" }, {});
+    } else if (style === "stick") {
+      viewer.setStyle({}, { stick: { radius: 0.22, colorscheme: "Jmol" } });
+    } else {
+      viewer.setStyle({}, { cartoon: { color: "spectrum", arrows: true } });
+    }
+    if (activeStep === 1) {
+      ["DA", "DT", "DG", "DC"].forEach(function (residue) { viewer.setStyle({ resn: residue }, { stick: { radius: 0.3, colorscheme: "Jmol" } }); });
+    } else if (activeStep === 2) {
+      viewer.setStyle({ atom: "P" }, { stick: { radius: 0.3, color: "orange" } });
+    }
+    viewer.render();
+    document.querySelectorAll("[data-style]").forEach(function (button) { button.classList.toggle("active", button.dataset.style === style); });
+  }
+  function setStep(step) {
+    activeStep = step;
+    stepCaption.textContent = stepDescriptions[step];
+    document.querySelectorAll("[data-step]").forEach(function (button) { button.classList.toggle("active", Number(button.dataset.step) === step); });
+    render("cartoon");
+  }
+  $3Dmol.download("pdb:" + model.id, viewer, {}, function () {
+    render("cartoon");
+    viewer.zoomTo();
+    viewer.render();
+    function showAtom(atom) {
+      if (!atom) return;
+      var residue = atom.resn || "DNA atom";
+      var pairings = { DA: "Adenine pairs with thymine.", DT: "Thymine pairs with adenine.", DG: "Guanine pairs with cytosine.", DC: "Cytosine pairs with guanine." };
+      var pairing = pairings[residue] || "This atom contributes to the DNA backbone or base structure.";
+      selectionInfo.querySelector("h3").textContent = residue + " · " + (atom.atom || atom.elem || "atom");
+      selectionInfo.querySelector("p").textContent = "Element: " + (atom.elem || "unknown") + ". Chain: " + (atom.chain || "-") + ". " + pairing;
+      if (viewer.removeAllLabels) viewer.removeAllLabels();
+      viewer.addLabel(residue + " / " + (atom.atom || atom.elem || "atom"), { position: atom, fontColor: "#08100f", backgroundColor: "#6ee7b0", backgroundOpacity: 0.9, fontSize: 12, borderThickness: 0, inFront: true });
+      moleculeCallout.textContent = residue + " / " + (atom.atom || atom.elem || "atom");
+      moleculeCallout.classList.remove("show");
+      void moleculeCallout.offsetWidth;
+      moleculeCallout.classList.add("show");
+      viewer.render();
+    }
+    viewer.setClickable({}, true, showAtom);
+    if (viewer.setHoverable) viewer.setHoverable({}, true, showAtom, function () {});
+    viewer.render();
+    status.textContent = "PDB " + model.id + " / interactive inspection ready";
+  });
+  document.querySelectorAll("[data-style]").forEach(function (button) { button.addEventListener("click", function () { render(button.dataset.style); }); });
+  document.querySelectorAll("[data-step]").forEach(function (button) { button.addEventListener("click", function () { setStep(Number(button.dataset.step)); }); });
+  document.getElementById("reset-btn").addEventListener("click", function () { viewer.zoomTo(); setStep(0); });
+})();
+</script>
+</body>
+</html>
